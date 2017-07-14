@@ -38,13 +38,29 @@
                                     <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="counter_background" translatesAutoresizingMaskIntoConstraints="NO" id="pAn-do-vG0">
                                         <rect key="frame" x="0.0" y="0.0" width="20" height="326"/>
                                     </imageView>
+                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="RvR-Sx-TZA">
+                                        <rect key="frame" x="2" y="2" width="16" height="322"/>
+                                        <color key="backgroundColor" red="0.46666666666666667" green="0.5607843137254902" blue="0.83529411764705885" alpha="1" colorSpace="calibratedRGB"/>
+                                    </view>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="21" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="k64-KI-Rih">
+                                        <rect key="frame" x="3" y="305" width="14" height="16"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="13"/>
+                                        <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
                                 </subviews>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                 <constraints>
                                     <constraint firstAttribute="trailing" secondItem="pAn-do-vG0" secondAttribute="trailing" id="4bH-qP-rOx"/>
                                     <constraint firstItem="pAn-do-vG0" firstAttribute="leading" secondItem="FXD-at-3BI" secondAttribute="leading" id="70c-NR-liz"/>
+                                    <constraint firstAttribute="bottom" secondItem="k64-KI-Rih" secondAttribute="bottom" constant="5" id="MnF-oT-o8I"/>
+                                    <constraint firstItem="RvR-Sx-TZA" firstAttribute="leading" secondItem="FXD-at-3BI" secondAttribute="leading" constant="2" id="N8V-m0-ByD"/>
                                     <constraint firstAttribute="bottom" secondItem="pAn-do-vG0" secondAttribute="bottom" id="Voc-An-N5z"/>
+                                    <constraint firstAttribute="bottom" secondItem="RvR-Sx-TZA" secondAttribute="bottom" constant="2" id="aiL-w9-1B8"/>
                                     <constraint firstItem="pAn-do-vG0" firstAttribute="top" secondItem="FXD-at-3BI" secondAttribute="top" id="mIr-gf-s5n"/>
+                                    <constraint firstItem="k64-KI-Rih" firstAttribute="centerX" secondItem="FXD-at-3BI" secondAttribute="centerX" id="oYh-WZ-aN4"/>
+                                    <constraint firstAttribute="trailing" secondItem="RvR-Sx-TZA" secondAttribute="trailing" constant="2" id="uca-9L-KFg"/>
+                                    <constraint firstItem="RvR-Sx-TZA" firstAttribute="top" secondItem="FXD-at-3BI" secondAttribute="top" constant="2" id="zm5-pz-NTg"/>
                                 </constraints>
                             </view>
                             <view clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="AZJ-R3-Zon">
@@ -77,7 +93,10 @@
                         <outlet property="cancelBtn" destination="oSz-1w-cXY" id="XRG-WC-2HQ"/>
                         <outlet property="imageWrapperView" destination="AZJ-R3-Zon" id="kEd-RJ-kPz"/>
                         <outlet property="sourceImageView" destination="cbq-NF-uZj" id="y7a-Qo-pUP"/>
-                        <outlet property="timerView" destination="FXD-at-3BI" id="IYT-37-G02"/>
+                        <outlet property="timerLabel" destination="k64-KI-Rih" id="0OA-vf-33b"/>
+                        <outlet property="timerView" destination="RvR-Sx-TZA" id="EPH-RC-nuy"/>
+                        <outlet property="timerViewTopConstraint" destination="zm5-pz-NTg" id="jkc-go-bB1"/>
+                        <outlet property="timerWrapperView" destination="FXD-at-3BI" id="yQz-5G-k2P"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>

@@ -11,10 +11,15 @@ import UIKit
 class ViewController: UIViewController {
     
     @IBOutlet weak var cancelBtn : UIButton!
-    @IBOutlet weak var timerView : UIView!
+    @IBOutlet weak var timerWrapperView : UIView!
     @IBOutlet weak var sourceImageView : UIImageView!
     @IBOutlet weak var imageWrapperView : UIView!
+    @IBOutlet weak var timerView : UIView!
+    @IBOutlet weak var timerViewTopConstraint : NSLayoutConstraint!
+    @IBOutlet weak var timerLabel : UILabel!
     
+    var originalImageArray : [UIImage] = []
+    var timer : Timer?
     var dragSource : UIImageView?
     var dragDestination : UIImageView?
     var dragTemp : UIImageView?
@@ -29,6 +34,8 @@ class ViewController: UIViewController {
         
         toggleViewsVisibility(hidden: true)
         
+        addBackgroundGradient()
+        
         downloadImage()
     }
 
@@ -40,11 +47,40 @@ class ViewController: UIViewController {
     fileprivate func toggleViewsVisibility(hidden : Bool) {
         
         cancelBtn.isHidden = hidden
-        timerView.isHidden = hidden
+        timerWrapperView.isHidden = hidden
         imageWrapperView.isHidden = hidden
         sourceImageView.isHidden = !hidden
     }
-
+    
+    fileprivate func addBackgroundGradient() {
+        
+        let startColor = UIColor(white: 220/255.0, alpha: 1.0)
+        let midColor = UIColor(white: 253/255.0, alpha: 1.0)
+        let endColor = startColor
+        
+        let gradientLayer = CAGradientLayer()
+        gradientLayer.frame = self.view.bounds
+        gradientLayer.colors = [startColor.cgColor , midColor.cgColor , endColor.cgColor]
+        
+        let x: Double = 45.0 / 360.0
+        let pi = Double.pi
+        
+        let a = pow(sinf(Float(2.0 * pi * ((x + 0.75) / 2.0))),2.0);
+        let b = pow(sinf(Float(2*pi*((x+0.0)/2))),2);
+        let c = pow(sinf(Float(2*pi*((x+0.25)/2))),2);
+        let d = pow(sinf(Float(2*pi*((x+0.5)/2))),2);
+        
+        gradientLayer.startPoint = CGPoint(x: CGFloat(a),y:CGFloat(b))
+        gradientLayer.endPoint = CGPoint(x: CGFloat(c),y: CGFloat(d))
+        
+        //gradientLayer.locations = [0.0,NSNumber(value:0.09*Double(view.bounds.size.width)) , NSNumber(value:0.09*Double(view.bounds.size.height)),1.0]
+        
+        
+        self.view.layer.insertSublayer(gradientLayer, at: 0)
+        
+        
+    }
+    
     fileprivate func downloadImage() {
         
         let urlStr = "https://s3-eu-west-1.amazonaws.com/wagawin-ad-platform/media/testmode/banner-landscape.jpg"
@@ -61,12 +97,9 @@ class ViewController: UIViewController {
             }
             
             DispatchQueue.main.async {
-                
                 let img = UIImage(data: data!)
                 self.sourceImageView.image = img
-
             }
-            
             
         }
         
@@ -78,17 +111,28 @@ class ViewController: UIViewController {
         if let img = sourceImageView.image {
             splitImage(img, intoRows: 4, andColumns: 3)
             toggleViewsVisibility(hidden: false)
+            startTimer()
         }
-        
     }
     
     @IBAction func cancelBtnTapped(_ sender : UIButton) {
+        
+       reset()
+    }
+    
+    fileprivate func reset() {
         
         for vw in imageWrapperView.subviews {
             vw.removeFromSuperview()
         }
         toggleViewsVisibility(hidden: true)
+        timerViewTopConstraint.constant = 2
+        self.timerLabel.text = "21"
+        timerWrapperView.layoutIfNeeded()
+        timer?.invalidate()
+        timer = nil
     }
+    
     
     fileprivate func splitImage(_ image : UIImage , intoRows rows : Int , andColumns columns:Int) {
         
@@ -99,7 +143,7 @@ class ViewController: UIViewController {
         let width = imageSize.width/CGFloat(rows)
         let height = imageSize.height/CGFloat(columns)
         
-        var imgViewArrays : [UIImage] = []
+        var imgArrays : [UIImage] = []
         
         for _ in 0..<columns {
             
@@ -113,7 +157,7 @@ class ViewController: UIViewController {
                 
                 let img = UIImage(cgImage: cImage!)
                 
-                imgViewArrays.append(img)
+                imgArrays.append(img)
                 
                 xPos += width
                 
@@ -123,8 +167,9 @@ class ViewController: UIViewController {
             
         }
         
+        originalImageArray = imgArrays
         
-        imgViewArrays.shuffle()
+        imgArrays.shuffle()
         
         var  i = 0
         var  j = 0
@@ -132,7 +177,7 @@ class ViewController: UIViewController {
         let imgViewWidth = imageWrapperView.frame.size.width/CGFloat(rows)
         let imgViewHeight = imageWrapperView.frame.size.height/CGFloat(columns)
         
-        for img in imgViewArrays {
+        for img in imgArrays {
             
             let imgViewFrm = CGRect(x: CGFloat(i)*imgViewWidth, y: CGFloat(j)*imgViewHeight, width:imgViewWidth, height: imgViewHeight)
             
@@ -217,6 +262,7 @@ extension ViewController {
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         
+        
         if let touch = touches.first , touch.view == imageWrapperView {
             dragTemp?.center = touch.location(in: imageWrapperView)
             let location = touch.location(in: imageWrapperView)
@@ -255,6 +301,117 @@ extension ViewController {
         }
 
     }
+}
+
+//MARK: -  Timer
+
+extension ViewController {
+    
+    func startTimer() {
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: {
+            
+            let totalHeight = self.timerWrapperView.bounds.size.height - 4.0
+            let duration = CGFloat(21.0)
+            let timerInterval = CGFloat(0.5)
+            let offSet = timerInterval * totalHeight / duration
+            
+            var counter = 0
+            var num = 21
+            
+            self.timer = Timer.scheduledTimer(withTimeInterval: TimeInterval(timerInterval), repeats: true) { (timer) in
+                
+                let newY = self.timerViewTopConstraint.constant + offSet
+                
+                if  newY >= self.timerWrapperView.bounds.size.height {
+                    self.timerWrapperView.layoutIfNeeded()
+                    timer.invalidate()
+                    self.calculateScore()
+                    return
+                }
+                
+                self.timerViewTopConstraint.constant = newY
+                
+                counter += 1
+                
+                if counter % 2 == 0 {
+                    num -= 1
+                    self.timerLabel.text = "\(num)"
+                }
+                
+                self.timerWrapperView.layoutIfNeeded()
+            }
+            
+            
+        })
+        
+    }
+    
+    fileprivate func calculateScore() {
+        
+        var finalImgArray : [UIImage] = []
+        
+        for view in imageWrapperView.subviews {
+            
+            if let imgView = view as? UIImageView {
+                
+                finalImgArray.append(imgView.image!)
+                
+            }
+            
+        }
+        
+        var score = 0
+        
+        for i in 0..<originalImageArray.count {
+            
+            let orginalImage = originalImageArray[i]
+            let finalImage = finalImgArray[i]
+            
+            if orginalImage == finalImage {
+                score += 1
+            }
+        }
+        
+        if score < 12 {
+            showFailureAlert(score)
+        }
+        else {
+            showSuccesAlert(score)
+        }
+        
+    }
+    
+    fileprivate func showFailureAlert(_ score : Int) {
+        
+        let alertController = UIAlertController(title: "Puzzle", message: "Sorry you were unable to complete the puzzle. Your final score : \(score)/12", preferredStyle: .alert)
+        
+        let closeAction = UIAlertAction(title: "Close", style: .cancel) { (action) in
+            self.reset()
+            alertController.dismiss(animated: true, completion: nil)
+        }
+        
+        alertController.addAction(closeAction)
+        
+        self.present(alertController, animated: true, completion: nil)
+        
+    }
+    
+    fileprivate func showSuccesAlert(_ score : Int) {
+        
+        let alertController = UIAlertController(title: "Puzzle", message: "Excellent!! You solved the puzzle. Your final score : \(score)/12", preferredStyle: .alert)
+        
+        let closeAction = UIAlertAction(title: "Close", style: .cancel) { (action) in
+            self.reset()
+            alertController.dismiss(animated: true, completion: nil)
+        }
+        
+        alertController.addAction(closeAction)
+        
+        self.present(alertController, animated: true, completion: nil)
+        
+    }
+
 }
 
 

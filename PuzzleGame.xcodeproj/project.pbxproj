@@ -12,6 +12,7 @@
 		C2A15F091F179B89006FE309 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C2A15F071F179B89006FE309 /* Main.storyboard */; };
 		C2A15F0B1F179B89006FE309 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C2A15F0A1F179B89006FE309 /* Assets.xcassets */; };
 		C2A15F0E1F179B89006FE309 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C2A15F0C1F179B89006FE309 /* LaunchScreen.storyboard */; };
+		C2F509AC1F18EB0D000FABE2 /* MutableCollection+Shuffle.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2F509AB1F18EB0D000FABE2 /* MutableCollection+Shuffle.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -22,6 +23,7 @@
 		C2A15F0A1F179B89006FE309 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		C2A15F0D1F179B89006FE309 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		C2A15F0F1F179B89006FE309 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		C2F509AB1F18EB0D000FABE2 /* MutableCollection+Shuffle.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "MutableCollection+Shuffle.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -56,6 +58,7 @@
 			children = (
 				C2A15F031F179B89006FE309 /* AppDelegate.swift */,
 				C2A15F051F179B89006FE309 /* ViewController.swift */,
+				C2F509AB1F18EB0D000FABE2 /* MutableCollection+Shuffle.swift */,
 				C2A15F071F179B89006FE309 /* Main.storyboard */,
 				C2A15F0A1F179B89006FE309 /* Assets.xcassets */,
 				C2A15F0C1F179B89006FE309 /* LaunchScreen.storyboard */,
@@ -137,6 +140,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C2F509AC1F18EB0D000FABE2 /* MutableCollection+Shuffle.swift in Sources */,
 				C2A15F061F179B89006FE309 /* ViewController.swift in Sources */,
 				C2A15F041F179B89006FE309 /* AppDelegate.swift in Sources */,
 			);

@@ -14,6 +14,10 @@ class ViewController: UIViewController {
     @IBOutlet weak var timerView : UIView!
     @IBOutlet weak var sourceImageView : UIImageView!
     @IBOutlet weak var imageWrapperView : UIView!
+    
+    var dragSource : UIImageView?
+    var dragDestination : UIImageView?
+    var dragTemp : UIImageView?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -151,27 +155,107 @@ class ViewController: UIViewController {
 
 }
 
+//MARK: -  Drag N Drop
 
-extension MutableCollection where Indices.Iterator.Element == Index {
-    /// Shuffles the contents of this collection.
-    mutating func shuffle() {
-        let c = count
-        guard c > 1 else { return }
+extension ViewController {
+    
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         
-        for (firstUnshuffled , unshuffledCount) in zip(indices, stride(from: c, to: 1, by: -1)) {
-            let d: IndexDistance = numericCast(arc4random_uniform(numericCast(unshuffledCount)))
-            guard d != 0 else { continue }
-            let i = index(firstUnshuffled, offsetBy: d)
-            swap(&self[firstUnshuffled], &self[i])
+        if let touch = touches.first , touch.view == imageWrapperView {
+            
+            let location = touch.location(in: imageWrapperView)
+            
+            for vw in imageWrapperView.subviews {
+                
+                let point = imageWrapperView.convert(location, to: vw)
+                
+                if vw.point(inside: point, with: event) {
+                    
+                    dragSource = vw as? UIImageView
+                    break
+                }
+                
+            }
+            
+            
+            dragTemp = UIImageView()
+            dragTemp?.frame = dragSource!.frame
+            dragTemp?.image = dragSource?.image
+            dragTemp?.center = location
+            
+            imageWrapperView.addSubview(dragTemp!)
+            
+            dragSource?.alpha = 0
+           
         }
+        
+    }
+    
+    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+        
+        if let touch = touches.first , touch.view == imageWrapperView {
+            dragTemp?.center = touch.location(in: imageWrapperView)
+        }
+        
+    }
+    
+    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
+        
+        if let touch = touches.first , touch.view == imageWrapperView {
+            dragTemp?.center = touch.location(in: imageWrapperView)
+            
+            UIView.animate(withDuration: 0.3, animations: { 
+                
+                self.dragTemp?.frame = self.dragSource!.frame
+                
+            }, completion: { (success) in
+                self.dragSource?.alpha = 1
+                self.dragTemp?.removeFromSuperview()
+            })
+        }
+    }
+    
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        
+        if let touch = touches.first , touch.view == imageWrapperView {
+            dragTemp?.center = touch.location(in: imageWrapperView)
+            let location = touch.location(in: imageWrapperView)
+            
+            for vw in imageWrapperView.subviews {
+                
+                let point = imageWrapperView.convert(location, to: vw)
+                
+                if vw.point(inside: point, with: event) {
+                    
+                    dragDestination = vw as? UIImageView
+                    break
+                }
+                
+            }
+            
+            let temp = UIImageView()
+            temp.image = dragDestination?.image
+            temp.frame = dragDestination!.frame
+            imageWrapperView.addSubview(temp)
+            
+            dragTemp?.center = dragDestination!.center
+            
+            UIView.animate(withDuration: 0.25, delay: 0, options: .curveLinear, animations: {
+                
+                temp.frame = self.dragSource!.frame
+                self.dragSource?.image = self.dragDestination?.image
+                self.dragDestination?.image = self.dragTemp?.image
+                
+            }, completion: { (success) in
+                 self.dragSource?.alpha = 1
+                temp.removeFromSuperview()
+                self.dragTemp?.removeFromSuperview()
+            })
+            
+        }
+
     }
 }
 
 
-//extension Array {
-//    mutating func shuffle() {
-//        for _ in 0..<((count>0) ? (count-1) : 0) {
-//            sort { (_,_) in arc4random() < arc4random() }
-//        }
-//    }
-//}
+

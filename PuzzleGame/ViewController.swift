@@ -18,7 +18,9 @@ class ViewController: UIViewController {
     @IBOutlet weak var timerViewTopConstraint : NSLayoutConstraint!
     @IBOutlet weak var timerLabel : UILabel!
     
+    let countdownLabel : UILabel = UILabel()
     var originalImageArray : [UIImage] = []
+    var gameStarted : Bool = false
     var timer : Timer?
     var dragSource : UIImageView?
     var dragDestination : UIImageView?
@@ -27,10 +29,6 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
-        
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(ViewController.imgTapped(_:)))
-        sourceImageView.addGestureRecognizer(tapGesture)
-        sourceImageView.isUserInteractionEnabled = true
         
         toggleViewsVisibility(hidden: true)
         
@@ -49,6 +47,7 @@ class ViewController: UIViewController {
         cancelBtn.isHidden = hidden
         timerWrapperView.isHidden = hidden
         imageWrapperView.isHidden = hidden
+        timerLabel.isHidden = hidden
         sourceImageView.isHidden = !hidden
     }
     
@@ -78,7 +77,6 @@ class ViewController: UIViewController {
         
         self.view.layer.insertSublayer(gradientLayer, at: 0)
         
-        
     }
     
     fileprivate func downloadImage() {
@@ -99,21 +97,16 @@ class ViewController: UIViewController {
             DispatchQueue.main.async {
                 let img = UIImage(data: data!)
                 self.sourceImageView.image = img
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5 , execute: {
+                    self.startCountDown()
+                })
             }
             
         }
         
         task.resume()
     }
-    
-    @objc fileprivate func imgTapped(_ sender : UITapGestureRecognizer) {
-        
-        if let img = sourceImageView.image {
-            splitImage(img, intoRows: 4, andColumns: 3)
-            toggleViewsVisibility(hidden: false)
-            startTimer()
-        }
-    }
+
     
     @IBAction func cancelBtnTapped(_ sender : UIButton) {
         
@@ -121,18 +114,73 @@ class ViewController: UIViewController {
     }
     
     fileprivate func reset() {
-        
-        for vw in imageWrapperView.subviews {
-            vw.removeFromSuperview()
-        }
+        self.gameStarted = false
         toggleViewsVisibility(hidden: true)
         timerViewTopConstraint.constant = 2
         self.timerLabel.text = "21"
         timerWrapperView.layoutIfNeeded()
         timer?.invalidate()
         timer = nil
+        for vw in imageWrapperView.subviews {
+            vw.removeFromSuperview()
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            self.startCountDown()
+        }
     }
     
+    fileprivate func startCountDown() {
+        
+        countdownLabel.text = "3"
+        countdownLabel.font = UIFont.systemFont(ofSize: 15.0)
+        countdownLabel.textColor = UIColor.white
+        countdownLabel.sizeToFit()
+        
+        countdownLabel.translatesAutoresizingMaskIntoConstraints = false
+        self.view.addSubview(countdownLabel)
+        
+        NSLayoutConstraint(item: countdownLabel, attribute: .centerX, relatedBy: .equal, toItem: self.view, attribute: .centerX, multiplier: 1.0, constant: 0).isActive = true
+        
+        NSLayoutConstraint(item: countdownLabel, attribute: .centerY, relatedBy: .equal, toItem: self.view, attribute: .centerY, multiplier: 1.0, constant: 0).isActive = true
+        
+        self.animateLable()
+    }
+    
+    
+    fileprivate func animateLable() {
+        
+        let alpha = CABasicAnimation(keyPath: "opacity")
+        alpha.fromValue = 1
+        alpha.toValue = 0
+        
+        let scaleUp = CABasicAnimation(keyPath: "transform.scale")
+        scaleUp.fromValue = 1
+        scaleUp.toValue = 12
+        
+        let animGroup = CAAnimationGroup()
+        animGroup.animations = [scaleUp,alpha]
+        animGroup.duration = 1
+        animGroup.beginTime = CACurrentMediaTime()
+        animGroup.isRemovedOnCompletion = false
+        animGroup.fillMode = kCAFillModeForwards
+        animGroup.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseIn)
+        animGroup.delegate = self
+        countdownLabel.layer.add(animGroup, forKey: nil)
+    }
+    
+    fileprivate func startGame() {
+        
+        if let img = sourceImageView.image {
+            splitImage(img, intoRows: 4, andColumns: 3)
+            toggleViewsVisibility(hidden: false)
+            timerLabel.isHidden = true
+            gameStarted = true
+            startTimer()
+        }
+        
+    }
+
     
     fileprivate func splitImage(_ image : UIImage , intoRows rows : Int , andColumns columns:Int) {
         
@@ -197,9 +245,36 @@ class ViewController: UIViewController {
         }
         
     }
+    
 
+    
 }
 
+extension ViewController : CAAnimationDelegate {
+    
+    func animationDidStop(_ anim: CAAnimation, finished flag: Bool) {
+        
+        if flag {
+            
+            if var num = Int(countdownLabel.text!) {
+                
+                if num <= 1 {
+                    countdownLabel.alpha = 0
+                    startGame()
+                    return
+                }
+                num -= 1
+                countdownLabel.text = "\(num)"
+                animateLable()
+
+            }
+            
+        }
+        
+        
+    }
+    
+}
 //MARK: -  Drag N Drop
 
 extension ViewController {
@@ -311,6 +386,10 @@ extension ViewController {
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: {
             
+            guard self.gameStarted else {
+                return
+            }
+            
             let totalHeight = self.timerWrapperView.bounds.size.height - 4.0
             let duration = CGFloat(21.0)
             let timerInterval = CGFloat(0.5)
@@ -336,6 +415,7 @@ extension ViewController {
                 
                 if counter % 2 == 0 {
                     num -= 1
+                    self.timerLabel.isHidden = false
                     self.timerLabel.text = "\(num)"
                 }
                 
